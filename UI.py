@@ -15,12 +15,17 @@ class FingerPrint(QWidget):
         self.setWindowTitle("指纹特征提取")
         self.GUInit()
         
-        self.image_enhencer = FingerprintImageEnhancer()
+        self.image_enhancer = FingerprintImageEnhancer()
         
         
-    # def EnhenceImg(self, img):
-    #     img = np.uint8(img)
-    #     self.enhenceImg = self.image_enhencer.enhance(img)
+    def EnhanceImg(self, img):
+        enhanceImg = self.image_enhancer.enhance(img)
+        enhanceImg = np.uint8(enhanceImg * 255)
+        return self.toImage(enhanceImg)
+        
+    def toImage(self, img):
+        return QtGui.QImage(img, img.shape[0], img.shape[1], QtGui.QImage.Format_RGB32)
+        
         
     def GUInit(self):    
         '''open image file'''
@@ -40,10 +45,10 @@ class FingerPrint(QWidget):
         self.labelEnhence.setText('图像增强')
         self.labelEnhence.move(410, 35)
         
-        self.showEnhenceImg = QLabel(self)
-        self.showEnhenceImg.setFixedSize(200, 200)
-        self.showEnhenceImg.move(350, 100)
-        self.showEnhenceImg.setStyleSheet("QLabel{background:white;}")
+        self.showEnhanceImg = QLabel(self)
+        self.showEnhanceImg.setFixedSize(200, 200)
+        self.showEnhanceImg.move(350, 100)
+        self.showEnhanceImg.setStyleSheet("QLabel{background:white;}")
         
         self.labelThin = QLabel(self)
         self.labelThin.setFixedSize(80, 30)
@@ -81,18 +86,17 @@ class FingerPrint(QWidget):
     def openimage(self):
         imgName, imgType = QFileDialog.getOpenFileName(self, "打开图片", "", "*.tif;;*.png;;All Files(*)")
         img = cv2.imread(imgName, 0)
-        self.img = QtGui.QPixmap(imgName).scaled(200, 200)
-        # self.label.setPixmap(jpg)
-        self.showOrigImg.setPixmap(self.img)
+        self.origImg = QtGui.QPixmap(imgName).scaled(200, 200)
+        self.showOrigImg.setPixmap(self.origImg)
         
-        # self.EnhenceImg(img)
-        self.enhenceImg = QtGui.QPicture(img)
-        self.showEnhenceImg.setPicture(self.enhenceImg)
-        # self.showEnhenceImg.setPixmap(self.enhenceImg)
-        self.showThinImg.setPixmap(self.img)
+        self.enhanceImg = self.EnhanceImg(img)
+        self.enhanceImg = QtGui.QPixmap.fromImage(self.enhanceImg)
+        self.showEnhanceImg.setPixmap(self.enhanceImg)
+              
+        # self.showThinImg.setPixmap(self.origImg)
         
-        self.img = QtGui.QPixmap(imgName).scaled(300, 300)
-        self.showFeatureImg.setPixmap(self.img)
+        # self.featureImg = QtGui.QPixmap(imgName).scaled(300, 300)
+        # self.showFeatureImg.setPixmap(self.featureImg)
 
 
 if __name__ == "__main__":
