@@ -600,126 +600,8 @@ def feature():
     show(img, featureImg)
 
 
-# def endpoint():
-#     global img
-#     endpoint1 = img
-#     endpoint2 = img
-#     endpoints = []
-#     # endpoint = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-#     h, w = img.shape
-#     for i in range(1, h - 1):
-#         for j in range(1, w - 1):
-#             if img[i, j] == 0:
-#                 eightField = int(
-#                     (img[i - 1, j - 1] + img[i - 1, j] + img[i - 1, j + 1] + img[i, j - 1] + img[i, j + 1] + \
-#                      img[i + 1, j - 1] + img[i + 1, j] + img[i + 1, j + 1]) / 255)
-#                 if eightField == 7:  # 黑色块1个
-#                     endpoint = []
-#                     endpoint.append(i)
-#                     endpoint.append(j)
-#                     endpoints.append(endpoint)
-#     for m in range(len(endpoints)):
-#         cv2.circle(endpoint2, (endpoints[m][1], endpoints[m][0]), 3, (0, 0, 255), 1)
-#
-#     show(endpoint2, endpointImg)
-#
-#
-# def bifurcation():
-#     global img
-#     bifurcation1 = img
-#     bifurcation2 = img
-#     bifurcations = []
-#     h, w = bifurcation1.shape
-#     for i in range(1, h - 1):
-#         for j in range(1, w - 1):
-#
-#             if bifurcation1[i, j] == 0:
-#
-#                 eightField = (bifurcation1[i - 1, j - 1] + bifurcation1[i - 1, j] + bifurcation1[i - 1, j + 1] +
-#                               bifurcation1[i, j - 1] + bifurcation1[i, j + 1] + bifurcation1[i + 1, j - 1] +
-#                               bifurcation1[i + 1, j] + bifurcation1[i + 1, j + 1]) / 255
-#                 if eightField == 5:  # 黑色块3个
-#                     bifurcation = []
-#                     bifurcation.append(i)
-#                     bifurcation.append(j)
-#                     bifurcations.append(bifurcation)
-#     for m in range(len(bifurcations)):
-#         cv2.circle(bifurcation2, (bifurcations[m][1], bifurcations[m][0]), 3, (0, 0, 255), 1)
-#
-#     show(bifurcation2, bifurcationImg)
-
-
-# def normalize():
-#     global img
-#     img = cv2.GaussianBlur(img, (3, 3), 0)  # 高斯模糊
-#     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # 转灰度图
-#     # 规格化处理
-#     h, w = img.shape
-#     e = 0
-#     for i in range(h):
-#         for j in range(w):
-#             e += img[i, j]
-#     e = e / h / w
-#     print(e)
-#     v = 0
-#     for i in range(h):
-#         for j in range(w):
-#             v += (img[i, j] - e) ** 2
-#     v = v / h / w
-#     print(v)
-#
-#     e0 = 100
-#     v0 = 100
-#     for i in range(h):
-#         for j in range(w):
-#             if img[i, j] > e:
-#                 img[i, j] = e0 + sqrt((v0 * (img[i, j] - e) ** 2) / v)
-#             else:
-#                 img[i, j] = e0 - sqrt((v0 * (img[i, j] - e) ** 2) / v)
-#     show(img, normImg)
-
-
-# def directionField():
-#     h, w = img.shape
-#     hBlockNum = int(h / 16 - 0.5)
-#     wBlockNum = int(w / 16 - 0.5)
-#
-#     directionFieldRow = []
-#     directionField = []
-#     for i in range(hBlockNum):
-#         for j in range(wBlockNum):
-#             sobelX = cv2.Sobel(img[16 * i:16 * i + 16, 16 * j:16 * j + 16], cv2.CV_16S, dx=1, dy=0)
-#             sobelX = cv2.convertScaleAbs(sobelX)
-#             # print(sobelX)
-#
-#             sobelY = cv2.Sobel(img[16 * i:16 * i + 16, 16 * j:16 * j + 16], cv2.CV_16S, dx=0, dy=1)
-#             sobelY = cv2.convertScaleAbs(sobelY)
-#
-#             temp = 2 * multiply(sobelX, sobelY)
-#             Vx = temp.sum()
-#
-#             temp = sobelX ** 2 - sobelY ** 2
-#             Vy = temp.sum()
-#
-#             theta = 0.5 * atan(Vx / Vy)
-#             print(theta)
-#             directionFieldRow.append(theta)
-#
-#         directionField.append(directionFieldRow)
-#     directionField = np.array(directionField)
-#     directionField = np.tile(directionField, (16, 16))
-#     # directionField = cv2.resize(directionField, (16 * wBlockNum, 16 * hBlockNum), interpolation=cv2.INTER_AREA)
-#     show(directionField, directionFieldImg)
-
-
 def show(mImg, label):
-    global oriTk, enhanceTk, thinningTk, featureTk
-
-    # h, w = mImg.shape[:2]
-    # if h > 200:
-    #     w = int(w * 200 / h)
-    #     h = 200
-    #     mImg = cv2.resize(mImg, (w, h), interpolation=cv2.INTER_AREA)
+    global oriTk, enhanceTk, thinningTk, feature
     mImg = Image.fromarray(mImg)
     if label == oriImg:
         oriTk = ImageTk.PhotoImage(image=mImg)
@@ -733,9 +615,6 @@ def show(mImg, label):
     elif label == featureImg:
         featureTk = ImageTk.PhotoImage(image=mImg)
         label.configure(image=featureTk)
-    # elif label == bifurcationImg:
-    #     bifurcationTk = ImageTk.PhotoImage(image=mImg)
-    #     label.configure(image=bifurcationTk)
 
 
 if __name__ == '__main__':
@@ -749,8 +628,6 @@ if __name__ == '__main__':
 
     oriImg = Label(root)
     oriImg.place(x=50, y=100)
-
-    # btnNorm = Button(root, text="规格化", command=normalize)
 
     btnEnhance = Button(root, text="2.图像增强", command=image_enhance)
     btnEnhance.place(x=350, y=50)
@@ -773,10 +650,5 @@ if __name__ == '__main__':
     txtFeature = Text(root, height=25, width=95)
     txtFeature.place(x=350, y=350)
 
-    # btnBifurcation = Button(root, text="分叉点特征提取及描述", command=bifurcation)
-    # btnBifurcation.place(x=350, y=350)
-    #
-    # bifurcationImg = Label(root)
-    # bifurcationImg.place(x=350, y=400)
 
     root.mainloop()

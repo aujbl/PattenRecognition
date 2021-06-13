@@ -4,7 +4,6 @@ import numpy as np
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtWidgets import *
 
-
 from FingerprintImageEnhancer import FingerprintImageEnhancer
 
 class FingerPrint(QWidget):
@@ -16,19 +15,14 @@ class FingerPrint(QWidget):
         self.GUInit()
         
         self.image_enhancer = FingerprintImageEnhancer()
-        
-        
+
     def EnhanceImg(self, img):
         enhanceImg = self.image_enhancer.enhance(img)
         enhanceImg = np.uint8(enhanceImg * 255)
-        return self.toImage(enhanceImg)
-        
-    def toImage(self, img):
-        return QtGui.QImage(img, img.shape[0], img.shape[1], QtGui.QImage.Format_RGB32)
-        
-        
+        return enhanceImg
+
     def GUInit(self):    
-        '''open image file'''
+        # open image file
         self.btn = QPushButton(self)
         self.btn.setText("打开图片")
         self.btn.setFixedSize(80, 30)
@@ -83,14 +77,21 @@ class FingerPrint(QWidget):
                                           )
         self.showResult.setText('特征提取结果')
 
+    def cvImgtoQtImg(self, cvImg):  # 将OpenCV图像转为PyQt图像
+        QtImgBuf = cv2.cvtColor(cvImg, cv2.COLOR_BGR2BGRA)
+        QtImg = QtGui.QImage(QtImgBuf.data, QtImgBuf.shape[1], QtImgBuf.shape[0], QtGui.QImage.Format_RGB32)
+        return QtImg
+
     def openimage(self):
         imgName, imgType = QFileDialog.getOpenFileName(self, "打开图片", "", "*.tif;;*.png;;All Files(*)")
         img = cv2.imread(imgName, 0)
-        self.origImg = QtGui.QPixmap(imgName).scaled(200, 200)
+        self.origImg = self.cvImgtoQtImg(img)
+        self.origImg = QtGui.QPixmap.fromImage(self.origImg).scaled(200, 200)
         self.showOrigImg.setPixmap(self.origImg)
-        
+
         self.enhanceImg = self.EnhanceImg(img)
-        self.enhanceImg = QtGui.QPixmap.fromImage(self.enhanceImg)
+        self.enhanceImg = self.cvImgtoQtImg(self.enhanceImg)
+        self.enhanceImg = QtGui.QPixmap.fromImage(self.enhanceImg).scaled(200, 200)
         self.showEnhanceImg.setPixmap(self.enhanceImg)
               
         # self.showThinImg.setPixmap(self.origImg)

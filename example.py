@@ -33,6 +33,8 @@ if __name__ == '__main__':
         img = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
     image_enhancer = FingerprintImageEnhancer()
     out = image_enhancer.enhance(img)
+
+    out
     
     
 
