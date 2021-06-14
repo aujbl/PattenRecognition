@@ -4,7 +4,9 @@ import numpy as np
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtWidgets import *
 
-from FingerprintImageEnhancer import FingerprintImageEnhancer
+import matplotlib.pyplot as plt
+from FE import image_enhance, thinning, feature
+
 
 class FingerPrint(QWidget):
     def __init__(self):
@@ -21,16 +23,21 @@ class FingerPrint(QWidget):
         self.labelResult = QLabel(self)
         self.showResult = QLabel(self)
 
-        self.resize(900, 750)
+        self.orig_img = None
+        self.enhance_img = None
+        self.thin_img = None
+        self.feature_img = None
+        self.features = None
+        self.text = ''
+
+        self.resize(1080, 750)
         self.setWindowTitle("指纹特征提取")
         self.GUInit()
-        
-        self.image_enhancer = FingerprintImageEnhancer()
 
-    def EnhanceImg(self, img):
-        enhanceImg = self.image_enhancer.enhance(img)
-        enhanceImg = np.uint8(enhanceImg * 255)
-        return enhanceImg
+    def FeatureExtractor(self, img):
+        self.enhance_img = image_enhance(img)
+        self.thin_img = thinning(self.enhance_img.copy())
+        self.feature_img, self.features = feature(self.thin_img.copy())
 
     def GUInit(self):    
         # open image file
@@ -38,7 +45,7 @@ class FingerPrint(QWidget):
         self.btn.setText("打开图片")
         self.btn.setFixedSize(80, 30)
         self.btn.move(110, 35)
-        self.btn.clicked.connect(self.openimage)
+        self.btn.clicked.connect(self.openImage)
 
         self.showOrigImg.setFixedSize(200, 200)
         self.showOrigImg.move(50, 100)
@@ -72,34 +79,53 @@ class FingerPrint(QWidget):
         self.labelResult.setText('特征提取结果')
         self.labelResult.move(625, 335)
 
-        self.showResult.setFixedSize(450, 300)
+        self.showResult.setFixedSize(640, 300)
         self.showResult.move(400, 400)
         self.showResult.setStyleSheet("QLabel{background:white;}"
-                                          "QLabel{color:rgb(300,300,300,120);font-size:10px;font-weight:bold;font-family:宋体;}"
+                                          "QLabel{color:rgb(300,300,300,120);font-size:13px;font-weight:bold;font-family:宋体;}"
                                           )
         self.showResult.setText('特征提取结果')
 
-    def cvImgtoQtImg(self, cvImg):  # 将OpenCV图像转为PyQt图像
-        QtImgBuf = cv2.cvtColor(cvImg, cv2.COLOR_BGR2BGRA)
-        QtImg = QtGui.QImage(QtImgBuf.data, QtImgBuf.shape[1], QtImgBuf.shape[0], QtGui.QImage.Format_RGB32)
-        return QtImg
+    def cvImgtoQtImg(self, cv_img):  # 将OpenCV图像转为PyQt图像
+        qt_img_buf = cv2.cvtColor(cv_img, cv2.COLOR_BGR2BGRA)
+        qt_img = QtGui.QImage(qt_img_buf.data, qt_img_buf.shape[1], qt_img_buf.shape[0], QtGui.QImage.Format_RGB32)
+        return qt_img
 
-    def openimage(self):
+    def openImage(self):
         img_path, _ = QFileDialog.getOpenFileName(self, "打开图片", "./DB3_B", "*.tif;;*.png;;All Files(*)")
         img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
-        self.orig_img = self.cvImgtoQtImg(img)
-        self.orig_img = QtGui.QPixmap.fromImage(self.orig_img).scaled(200, 200)
-        self.showOrigImg.setPixmap(self.orig_img)
 
-        self.enhanceImg = self.EnhanceImg(img)
-        self.enhanceImg = self.cvImgtoQtImg(self.enhanceImg)
-        self.enhanceImg = QtGui.QPixmap.fromImage(self.enhanceImg).scaled(200, 200)
-        self.showEnhanceImg.setPixmap(self.enhanceImg)
+        self.FeatureExtractor(img)
 
-        self.showThinImg.setPixmap(self.enhanceImg)
+        orig_img = self.cvImgtoQtImg(img)
+        orig_img = QtGui.QPixmap.fromImage(orig_img).scaled(200, 200)
+        self.showOrigImg.setPixmap(orig_img)
 
-        self.featureImg = self.enhanceImg.scaled(300, 300)
-        self.showFeatureImg.setPixmap(self.featureImg)
+        enhance_img = np.uint8(self.enhance_img)
+        enhance_img = self.cvImgtoQtImg(enhance_img)
+        enhance_img = QtGui.QPixmap.fromImage(enhance_img).scaled(200, 200)
+        self.showEnhanceImg.setPixmap(enhance_img)
+
+        thin_img = np.uint8(self.thin_img)
+        thin_img = self.cvImgtoQtImg(thin_img)
+        thin_img = QtGui.QPixmap.fromImage(thin_img).scaled(200, 200)
+        self.showThinImg.setPixmap(thin_img)
+
+        feature_img = np.uint8(self.feature_img)
+        feature_img = self.cvImgtoQtImg(feature_img)
+        feature_img = QtGui.QPixmap.fromImage(feature_img).scaled(300, 300)
+        self.showFeatureImg.setPixmap(feature_img)
+
+        self.text = ''
+        for feature in self.features:
+            text = '坐标：(%d, %d)，类型：%s ，角度：' % (feature[0], feature[1], feature[2])
+            for angle in feature[3]:
+                angle = angle / 3.14 * 180
+                text += '%.2f°\t' % angle
+            self.text += (text + '\n')
+
+        self.showResult.setText(self.text)
+
 
 
 if __name__ == "__main__":

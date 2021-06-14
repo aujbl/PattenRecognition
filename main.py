@@ -36,8 +36,8 @@ def choosePic():
         show(img, oriImg)
 
 
-def image_enhance():
-    global img
+def image_enhance(img):
+    # global img
     blksze = 16
     thresh = 0.1
     normim, mask = ridge_segment(img, blksze, thresh)  # normalise the image and find a ROI
@@ -65,8 +65,8 @@ def image_enhance():
 
     img = 255 * (newim >= -3)
     # print(img)
-    show(img, enhanceImg)
-
+    # show(img, enhanceImg)
+    return img
 
 def normalise(img):
     normed = (img - np.mean(img)) / (np.std(img))
@@ -383,10 +383,10 @@ def HThin(image, array):
     return image
 
 
-def thinning(num=10):
+def thinning(img, num=10):
     # iXihua = cv.CreateImage(cv.GetSize(image), 8, 1)
     # cv.Copy(image, iXihua)
-    global img
+    # global img
     array = [0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, \
              1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, \
              0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, \
@@ -409,12 +409,13 @@ def thinning(num=10):
     for i in range(num):
         VThin(img, array)
         HThin(img, array)
-    show(img, thinningImg)
-    print(img)
+    # show(img, thinningImg)
+    # print(img)
+    return img
 
 
-def feature():
-    global img
+def feature(img):
+    # global img
     # endpoint1 = img
     # endpoint2 = img
     features = []
@@ -588,7 +589,7 @@ def feature():
                             feature.append("bifurcation")
                             feature.append(directions)
                             features.append(feature)
-    print(features)
+    # print(features)
     for i in range(len(features)):
         txtFeature.insert(END, str(features[i]) + '\n')
     for m in range(len(features)):
@@ -596,8 +597,8 @@ def feature():
             cv2.circle(img, (features[m][1], features[m][0]), 3, (0, 0, 255), 1)
         else:
             cv2.circle(img, (features[m][1], features[m][0]), 3, (0, 0, 255), -1)
-
-    show(img, featureImg)
+    return img, features
+    # show(img, featureImg)
 
 
 def show(mImg, label):
