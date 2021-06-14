@@ -10,6 +10,17 @@ class FingerPrint(QWidget):
     def __init__(self):
         super(FingerPrint, self).__init__()
 
+        self.btn = QPushButton(self)
+        self.showOrigImg = QLabel(self)
+        self.labelEnhance = QLabel(self)
+        self.showEnhanceImg = QLabel(self)
+        self.labelThin = QLabel(self)
+        self.showThinImg = QLabel(self)
+        self.labelFeatureImg = QLabel(self)
+        self.showFeatureImg = QLabel(self)
+        self.labelResult = QLabel(self)
+        self.showResult = QLabel(self)
+
         self.resize(900, 750)
         self.setWindowTitle("指纹特征提取")
         self.GUInit()
@@ -23,53 +34,44 @@ class FingerPrint(QWidget):
 
     def GUInit(self):    
         # open image file
-        self.btn = QPushButton(self)
+
         self.btn.setText("打开图片")
         self.btn.setFixedSize(80, 30)
         self.btn.move(110, 35)
         self.btn.clicked.connect(self.openimage)
-        
-        self.showOrigImg = QLabel(self)
+
         self.showOrigImg.setFixedSize(200, 200)
         self.showOrigImg.move(50, 100)
         self.showOrigImg.setStyleSheet("QLabel{background:white;}")
-        
-        self.labelEnhence = QLabel(self)
-        self.labelEnhence.setFixedSize(80, 30)
-        self.labelEnhence.setText('图像增强')
-        self.labelEnhence.move(410, 35)
-        
-        self.showEnhanceImg = QLabel(self)
+
+        self.labelEnhance.setFixedSize(80, 30)
+        self.labelEnhance.setText('图像增强')
+        self.labelEnhance.move(410, 35)
+
         self.showEnhanceImg.setFixedSize(200, 200)
         self.showEnhanceImg.move(350, 100)
         self.showEnhanceImg.setStyleSheet("QLabel{background:white;}")
-        
-        self.labelThin = QLabel(self)
+
         self.labelThin.setFixedSize(80, 30)
         self.labelThin.setText('图像细化')
         self.labelThin.move(710, 35)
-        
-        self.showThinImg = QLabel(self)
+
         self.showThinImg.setFixedSize(200, 200)
         self.showThinImg.move(650, 100)
         self.showThinImg.setStyleSheet("QLabel{background:white;}")
-        
-        self.labelFeatureImg = QLabel(self)
+
         self.labelFeatureImg.setFixedSize(80, 30)
         self.labelFeatureImg.setText('特征提取结果')
         self.labelFeatureImg.move(160, 335)
-        
-        self.showFeatureImg = QLabel(self)
+
         self.showFeatureImg.setFixedSize(300, 300)
         self.showFeatureImg.move(50, 400)
         self.showFeatureImg.setStyleSheet("QLabel{background:white;}")
-        
-        self.labelResult = QLabel(self)
+
         self.labelResult.setFixedSize(80, 30)
         self.labelResult.setText('特征提取结果')
         self.labelResult.move(625, 335)
-        
-        self.showResult = QLabel(self)
+
         self.showResult.setFixedSize(450, 300)
         self.showResult.move(400, 400)
         self.showResult.setStyleSheet("QLabel{background:white;}"
@@ -83,21 +85,21 @@ class FingerPrint(QWidget):
         return QtImg
 
     def openimage(self):
-        imgName, imgType = QFileDialog.getOpenFileName(self, "打开图片", "", "*.tif;;*.png;;All Files(*)")
-        img = cv2.imread(imgName, 0)
-        self.origImg = self.cvImgtoQtImg(img)
-        self.origImg = QtGui.QPixmap.fromImage(self.origImg).scaled(200, 200)
-        self.showOrigImg.setPixmap(self.origImg)
+        img_path, _ = QFileDialog.getOpenFileName(self, "打开图片", "./DB3_B", "*.tif;;*.png;;All Files(*)")
+        img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
+        self.orig_img = self.cvImgtoQtImg(img)
+        self.orig_img = QtGui.QPixmap.fromImage(self.orig_img).scaled(200, 200)
+        self.showOrigImg.setPixmap(self.orig_img)
 
         self.enhanceImg = self.EnhanceImg(img)
         self.enhanceImg = self.cvImgtoQtImg(self.enhanceImg)
         self.enhanceImg = QtGui.QPixmap.fromImage(self.enhanceImg).scaled(200, 200)
         self.showEnhanceImg.setPixmap(self.enhanceImg)
-              
-        # self.showThinImg.setPixmap(self.origImg)
-        
-        # self.featureImg = QtGui.QPixmap(imgName).scaled(300, 300)
-        # self.showFeatureImg.setPixmap(self.featureImg)
+
+        self.showThinImg.setPixmap(self.enhanceImg)
+
+        self.featureImg = self.enhanceImg.scaled(300, 300)
+        self.showFeatureImg.setPixmap(self.featureImg)
 
 
 if __name__ == "__main__":
