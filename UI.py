@@ -7,6 +7,9 @@ from PyQt5.QtWidgets import *
 import matplotlib.pyplot as plt
 from FE import image_enhance, thinning, feature
 
+def imshow(img, name=' '):
+    cv2.imshow(name, img)
+    cv2.waitKey(0)
 
 class FingerPrint(QWidget):
     def __init__(self):
@@ -34,11 +37,6 @@ class FingerPrint(QWidget):
         self.setWindowTitle("指纹特征提取")
         self.GUInit()
 
-    def FeatureExtractor(self, img):
-        self.enhance_img = image_enhance(img)
-        self.thin_img = thinning(self.enhance_img.copy())
-        self.feature_img, self.features = feature(self.thin_img.copy())
-
     def GUInit(self):    
         # open image file
 
@@ -63,7 +61,7 @@ class FingerPrint(QWidget):
         self.labelThin.setText('图像细化')
         self.labelThin.move(710, 35)
 
-        self.showThinImg.setFixedSize(200, 200)
+        self.showThinImg.setFixedSize(280, 280)
         self.showThinImg.move(650, 100)
         self.showThinImg.setStyleSheet("QLabel{background:white;}")
 
@@ -75,9 +73,9 @@ class FingerPrint(QWidget):
         self.showFeatureImg.move(50, 400)
         self.showFeatureImg.setStyleSheet("QLabel{background:white;}")
 
-        self.labelResult.setFixedSize(80, 30)
-        self.labelResult.setText('特征提取结果')
-        self.labelResult.move(625, 335)
+        # self.labelResult.setFixedSize(80, 30)
+        # self.labelResult.setText('特征提取结果')
+        # self.labelResult.move(625, 335)
 
         self.showResult.setFixedSize(640, 300)
         self.showResult.move(400, 400)
@@ -85,6 +83,13 @@ class FingerPrint(QWidget):
                                           "QLabel{color:rgb(300,300,300,120);font-size:13px;font-weight:bold;font-family:宋体;}"
                                           )
         self.showResult.setText('特征提取结果')
+
+    def FeatureExtractor(self, img):
+        self.enhance_img = image_enhance(img)
+        cv2.imwrite('D:/PR/ex4/Fingerprint-Feature-Extraction-master/Fingerprint-Feature-Extraction-master/my_enhance.jpg', self.enhance_img)
+        self.thin_img = thinning(self.enhance_img.copy())
+        self.feature_img, self.features = feature(self.thin_img.copy())
+
 
     def cvImgtoQtImg(self, cv_img):  # 将OpenCV图像转为PyQt图像
         qt_img_buf = cv2.cvtColor(cv_img, cv2.COLOR_BGR2BGRA)
@@ -108,13 +113,13 @@ class FingerPrint(QWidget):
 
         thin_img = np.uint8(self.thin_img)
         thin_img = self.cvImgtoQtImg(thin_img)
-        thin_img = QtGui.QPixmap.fromImage(thin_img).scaled(200, 200)
-        self.showThinImg.setPixmap(thin_img)
+        thin_img = QtGui.QPixmap.fromImage(thin_img).scaled(280, 280)
+        self.showThinImg.setPixmap(thin_img.copy())
 
         feature_img = np.uint8(self.feature_img)
         feature_img = self.cvImgtoQtImg(feature_img)
         feature_img = QtGui.QPixmap.fromImage(feature_img).scaled(300, 300)
-        self.showFeatureImg.setPixmap(feature_img)
+        self.showFeatureImg.setPixmap(feature_img.copy())
 
         self.text = ''
         for feature in self.features:
